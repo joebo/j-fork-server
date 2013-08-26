@@ -10,7 +10,6 @@ st64=: -.&'.'^:(-.IF64)
 GetProcessId=:   'kernel32 GetProcessId   > x i' & cd
 WSAPROTOCOL_INFO=:  st64 'Flag1....Flag2....Flag3....Flag4....ProvFlags....ProvID....Catalog....Version....Family....MaxSockAddr....MinSockAddr....Type....Protocol....Offset....Order....MessageSize....Reserved....Protocol'
 WSADuplicateSocketJ=: 'ws2_32 WSADuplicateSocketW i i i *c'
-WSASocket=: 'ws2_32 WSASocketW i i i i *c i i'
 
 s=:> 0} y
 hpid=:> 1} y
@@ -24,12 +23,7 @@ smoutput th
 arrbin  =: 3!:1
 (arrbin pi) fwrite 'shared.txt'
 
-smoutput ResumeThread th
-
-FROM_PROTOCOL_INFO=:-1
-ss=:WSASocket cd FROM_PROTOCOL_INFO;FROM_PROTOCOL_INFO;FROM_PROTOCOL_INFO;pi;0;0
-out=: > 0} ss
-out
+ResumeThread th
 )
 
 forkj=: 3 : 0
