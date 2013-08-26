@@ -88,7 +88,7 @@ wait =: 500  NB. Wait time in milliseconds - this is very arbitrary.
 
 while. msg -.@:-: 'exit' do.
   while. ((3$a:) -: sdc =. sdcheck sdselect SKLISTEN;'';'';wait) do. 
-      Sleep 100 NB. not sure why the wait isn't blocking above. At one point it was
+      Sleep wait NB. not sure why the wait isn't blocking above. At one point it was
   end.
   smoutput 'Connected.'
   skserver=: 0 pick sdcheck sdaccept SKLISTEN
