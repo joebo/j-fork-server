@@ -1,6 +1,56 @@
 load'socket'
 coinsert 'jsocket'
  
+
+NB. Timer test
+
+NB. timer'' sets a timer for 10 seconds from now.
+NB. cdcallback gets control when the timer goes off.
+NB. dtq'' should be run when you are done with the timer.
+NB. timert'' sets the timer to trigger ever .1 second until dtq'' is run.
+
+require 'dll'
+
+
+TerminateProcess=: 'kernel32 TerminateProcess i x x'&cd
+CreateTimerQueueTimer=: >@{.@('kernel32 CreateTimerQueueTimer i *x x x *x i i i'&(15!:0))
+CreateTimerQueue=: >@{.@('kernel32 CreateTimerQueue i'&(15!:0))
+DeleteTimerQueueEx=: >@{.@('kernel32 DeleteTimerQueueEx i x x'&(15!:0))
+
+timercb=: cdcb 2
+
+timercount=: 0
+
+cdcallback=: 3 : 0
+cdresult=:y
+timer_popped=: 6!:0 ''
+timercount=:>:timercount
+
+wait=.100
+sdc=:sdcheck sdselect SKLISTEN;'';'';wait
+if. # >  ({. sdc)
+do.
+smoutput 'connected'
+  smoutput 'Connected.'
+  skserver=: 0 pick sdcheck sdaccept SKLISTEN
+  pid =: forkj 'jconsole.exe';'spawn.ijs'
+  sddupe skserver;pid
+
+end.
+)
+
+
+timert=: 3 : 0
+nt=.,2-2
+timerq=:CreateTimerQueue''
+CreateTimerQueueTimer nt;timerq;timercb;(,2-2);100;100;0
+timer_set=:6!:0''
+)
+
+dtq=: 3 : 0
+DeleteTimerQueueEx timerq;2-2
+)
+
 Sleep=:'kernel32 Sleep n i' & cd
 ResumeThread=: 'kernel32 ResumeThread i x'&cd
 SuspendThread=: 'kernel32 SuspendThread i x'&cd
@@ -20,6 +70,10 @@ ret=:WSADuplicateSocketJ cd s;pid;pi
 smoutput 'process thread is'
 smoutput th
 
+while. 1 = fexist 'shared.txt' do. 
+  smoutput 'waiting for lock'
+  Sleep 200
+end.
 arrbin  =: 3!:1
 (arrbin pi) fwrite 'shared.txt'
 
@@ -71,6 +125,7 @@ ph=. ptr Proh sget PROCESSINFO pi
 th=: ptr Thrh sget PROCESSINFO pi
 smoutput 'thread is'
 smoutput th
+smoutput ph
 SuspendThread th
 NB. CloseHandle ph
 ph
@@ -97,9 +152,21 @@ while. msg -.@:-: 'exit' do.
 end.
 )
 
+
+connectNoLoop =: 3 : 0
+msg =. ''
+sdcleanup ''
+SKLISTEN =: 0 pick sdcheck sdsocket''
+sdcheck sdbind SKLISTEN ; AF_INET_jsocket_ ; '' ; y
+sdcheck sdlisten SKLISTEN , 1
+timert''
+)
+
 NB. 'jconsole needs to be in your path'
 NB. uncomment CREATE_NEW_CONSOLE to see the spawned J session
-connectLoop 1500
+NB. connectLoop 1500
+
+connectNoLoop 1500
 
 
 
